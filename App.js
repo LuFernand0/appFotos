@@ -1,7 +1,10 @@
-import { Home } from './pages/Home';
+import {SafeAreaView} from "react-native";
+import Home from './pages/Home';
 
 export default function App() {
   return (
-    <Home />
+    <SafeAreaView>
+      <Home />
+    </SafeAreaView>
   );
 }

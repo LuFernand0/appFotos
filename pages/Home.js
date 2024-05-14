@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Image, FlatList, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage, fire } from "../Firebase";
 import { collection, onSnapshot } from 'firebase/firestore';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function Home() {
     const [img, setImg] = useState("");
@@ -46,28 +47,49 @@ export default function Home() {
         } catch (e) {
             console.log(e);
         }
-    }
+    };
+
+    async function pickImage() {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImg(result.assets[0].uri);
+            await uploadImage(result.assets[0].uri, "image");
+        }
+    };
 
     return (
-        <View>
-            <Text>Minhas Fotos Lindas</Text>
+        <View style={estilo.container}>
+            <Text style={estilo.titulo}>Minhas Fotos Lindas</Text>
             <FlatList
-            data={file}
-            keyExtractor={(item)=>item.url}
-            renderItem={({item}) => {
-                if(item.fileType === "img"){
-                    return (
-                        <Image 
-                            source={{uri:item.url}}
-                            style={estilo.fotos}
-                        />
-                    )
+                data={file}
+                keyExtractor={(item) => item.url}
+                renderItem={({ item }) => {
+                    if (item.fileType === "img") {
+                        return (
+                            <Image
+                                source={{ uri: item.url }}
+                                style={estilo.fotos}
+                            />
+                        )
+                    }
                 }
-            }
-            }
-            numColumns={2}
-            
+                }
+                numColumns={2}
+
             />
+
+            <TouchableOpacity
+                onPress={pickImage}
+                style={estilo.imgPick}
+            >
+                <Text style={estilo.titulo}>Imagens</Text>
+            </TouchableOpacity>
 
         </View>
     )
@@ -75,13 +97,21 @@ export default function Home() {
 }
 
 const estilo = StyleSheet.create({
-container: {
-    flex:1,
-    justifyContent: 'center',
-    alignItems:'center'
-},
-fotos:{
-    width: 200,
-    height: 200
-}
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    fotos: {
+        width: 200,
+        height: 200
+    },
+    titulo:{
+        fontSize: 35
+    },
+    imgPick: {
+        position: "absolute",
+        justifyContent: "center",
+        alignItems: "center"
+    }
 });
